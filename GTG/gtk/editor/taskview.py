@@ -33,7 +33,8 @@ from gettext import gettext as _
 from typing import List
 
 from GTG.gtk.editor.text_tags import (TitleTag, SubTaskTag, TaskTagTag,
-                                      InternalLinkTag, LinkTag, CheckboxTag)
+                                      InternalLinkTag, LinkTag, CheckboxTag,
+                                      InvisibleTag, SubheadingTag)
 
 
 # Regex to find GTG's tags.
@@ -156,6 +157,9 @@ class TaskView(Gtk.TextView):
         self.title_tag = TitleTag()
         self.table.add(self.title_tag)
 
+        self.subheading_tag = SubheadingTag()
+        self.table.add(self.subheading_tag)
+
         self.checkbox_tag = CheckboxTag()
         self.table.add(self.checkbox_tag)
 
@@ -228,6 +232,7 @@ class TaskView(Gtk.TextView):
                 start.forward_line()
                 continue
 
+            self.detect_subheading(text, start)
             self.detect_url(text, start)
             self.detect_internal_link(text, start)
             self.detect_tag(text, start)
@@ -466,6 +471,21 @@ class TaskView(Gtk.TextView):
 
             self.table.add(url_tag)
             self.buffer.apply_tag(url_tag, url_start, url_end)
+
+
+    def detect_subheading(self, text: str, start: Gtk.TextIter) -> None:
+        """Detect subheadings (akin to H2)."""
+
+        if text.startswith('# '):
+            end = start.copy()
+            end.forward_chars(2)
+
+            invisible_tag = InvisibleTag()
+            self.table.add(invisible_tag)
+            self.buffer.apply_tag(invisible_tag, start, end)
+
+            end.forward_to_line_end()
+            self.buffer.apply_tag(self.subheading_tag, start, end)
 
 
     def detect_title(self) -> Gtk.TextIter:

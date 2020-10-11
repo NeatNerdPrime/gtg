@@ -34,6 +34,7 @@ colors = {
     'link_active': '#007bff',
     'link_inactive': 'gray',
     'background_hover': 'light gray',
+    'invisible': '#BBBBBB',
 }
 
 
@@ -43,6 +44,7 @@ def use_dark_mode() -> None:
     colors['link_active'] = '#6eb4ff'
     colors['link_inactive'] = 'gray'
     colors['background_hover'] = '#454545'
+    colors['invisible'] = '#444444'
 
 
 def use_light_mode() -> None:
@@ -51,6 +53,7 @@ def use_light_mode() -> None:
     colors['link_active'] = '#007bff'
     colors['link_inactive'] = 'gray'
     colors['background_hover'] = 'light gray'
+    colors['invisible'] = '#BBBBBB'
 
 
 # ------------------------------------------------------------------------------
@@ -80,21 +83,26 @@ class InvisibleTag(Gtk.TextTag):
     def __init__(self) -> None:
         super().__init__()
 
-        self.set_property('invisible', True)
-        self.set_property('left-margin', 40)
-        self.set_property('foreground', '#111111')
+        # self.set_property('invisible', True)
+        self.set_property('foreground', colors['invisible'])
+
+    # NOTE: What the hell, isn't this supposed to be invisible?
+    # Well, it turns out GTK's Text buffer has a pretty bad bug when
+    # it comes to invisible chars. The byte count ends up farther than
+    # then end of the line, and the entire program crashes.
+    # This is the error: "Byte index 1362 is off the end of the line"
+    # When that's fixed, we should make this actually become invisible!
+
+    # def set_hover(self) -> None:
+    #     """Change tag appareance when hovering."""
+
+    #     self.set_property('invisible', False)
 
 
-    def set_hover(self) -> None:
-        """Change tag appareance when hovering."""
+    # def reset(self) -> None:
+    #     """Reset tag appareance when not hovering."""
 
-        self.set_property('invisible', False)
-
-
-    def reset(self) -> None:
-        """Reset tag appareance when not hovering."""
-
-        self.set_property('invisible', True)
+    #     self.set_property('invisible', True)
 
 
 class InternalLinkTag(Gtk.TextTag):
@@ -209,6 +217,18 @@ class TitleTag(Gtk.TextTag):
         self.set_property('size_points', 16)
         self.set_property('pixels_above_lines', 15)
         self.set_property('pixels_below_lines', 30)
+
+
+class SubheadingTag(Gtk.TextTag):
+    """Subheading Text tag."""
+
+
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.set_property('size_points', 14)
+        self.set_property('pixels_above_lines', 25)
+        self.set_property('pixels_below_lines', 10)
 
 
 class TaskTagTag(Gtk.TextTag):
